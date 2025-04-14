@@ -1,24 +1,29 @@
-  case MacOS.version
-<% package_triples.take(package_triples.count-1).each do |os_ver, pkg_ver, x86_64_sha, arm64_sha| -%>
-  when '<%= os_ver %>'
-    os_ver = '<%= os_ver %>'
-    version '<%= pkg_ver %>'
-    if arch == 'arm64'
-      sha256 '<%= arm64_sha %>'
-    elsif arch == 'x86_64'
-      sha256 '<%= x86_64_sha %>'
-    end
+<% supported_vers = package_data.keys.sort_by {|x| x.to_i} -%>
+  arch arm: 'arm64', intel: 'x86_64'
+
+<% package_data.each do |os_ver, data| -%>
+<% pinfo = data[:pkg_info] -%>
+  on_<%= data[:os_name] %> <%= (os_ver == supported_vers.last ? ':or_newer' : '') %> do
+    on_arm do
+<% if pinfo[:arm64] -%>
+      version "<%= pinfo[:arm64][:version] %>"
+      sha256  "<%= pinfo[:arm64][:sha256] %>"
+<% else -%>
+      raise "Not supported"
 <% end -%>
-  else
-    os_ver = '<%= package_triples.last[0] %>'
-    version '<%= package_triples.last[1] %>'
-    if arch == 'x86_64'
-      sha256 '<%= package_triples.last[2] %>'
-    elsif arch == 'arm64'
-      sha256 '<%= package_triples.last[3] %>'
+    end
+    on_intel do
+<% if pinfo[:x86_64] -%>
+      version "<%= pinfo[:x86_64][:version] %>"
+      sha256  "<%= pinfo[:x86_64][:sha256] %>"
+<% else -%>
+      raise "Not supported"
+<% end -%>
     end
   end
+<% end -%>
 
-  depends_on macos: '>= :<%= VERSION_TO_CODENAME[package_triples[0][0]] %>'
-  url "<%= url %>"
+  depends_on macos: '>= :<%= package_data[supported_vers.first][:os_name] %>'
+
+  url "<%= '%s/#{MacOS.version.major}/#{arch}/%s-#{version}-1.osx#{MacOS.version.major}.dmg' % [base_url, pkg] %>"
   pkg "<%= pkg %>-#{version}-1-installer.pkg"
