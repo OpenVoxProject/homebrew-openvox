@@ -16,7 +16,7 @@ A tap for [Puppet](https://puppet.com) macOS packages
 ## How do I install these packages?
 
 ```bash
-brew install --cask puppetlabs/puppet/<package>
+brew install --cask OpenVoxProject/homebrew-openvox/<package>
 ```
 
 ### Bolt
@@ -24,7 +24,7 @@ brew install --cask puppetlabs/puppet/<package>
 To install [Bolt](https://github.com/puppetlabs/bolt) with brew run
 
 ```bash
-brew install --cask puppetlabs/puppet/puppet-bolt
+brew install --cask OpenVoxProject/homebrew-openvox/puppet-bolt
 ```
 
 This will install bolt to `/opt/puppetlabs/bin/bolt`, so to use bolt add `/opt/puppetlabs/bin` to your path
@@ -47,13 +47,13 @@ brew install puppet-bolt@2
 To install the latest version of [PE Client Tools](https://puppet.com/docs/pe/latest/installing_pe_client_tools.html) run
 
 ```bash
-brew install puppetlabs/puppet/pe-client-tools
+brew install OpenVoxProject/homebrew-openvox/pe-client-tools
 ```
 
 To install the client tools for PE 2021, run
 
 ```bash
-brew install puppetlabs/puppet/pe-client-tools
+brew install OpenVoxProject/homebrew-openvox/pe-client-tools
 ```
 
 This will install the standalone commands from pe-client-tools to `/opt/puppetlabs/bin` so you'll need to have `/opt/puppetlabs/bin` in your path. All the commands are also available via a puppet face if you have the puppet-agent installed too.
@@ -63,7 +63,7 @@ This will install the standalone commands from pe-client-tools to `/opt/puppetla
 To install [PDK](https://github.com/puppetlabs/pdk) with brew:
 
 ```bash
-brew install --cask puppetlabs/puppet/pdk
+brew install --cask OpenVoxProject/homebrew-openvox/pdk
 ```
 
 This will install PDK into `/opt/puppetlabs/pdk` and add an entry into `/etc/paths.d` to add PDK to your
@@ -78,7 +78,7 @@ to learn more.
 To install the latest PDK 1.x release, run
 
 ```bash
-brew tap puppetlabs/puppet
+brew tap OpenVoxProject/homebrew-openvox
 brew install pdk@1
 ```
 
@@ -87,7 +87,7 @@ brew install pdk@1
 To install the very latest [Puppet Agent](https://github.com/puppetlabs/puppet-agent) with brew:
 
 ```bash
-brew install puppetlabs/puppet/puppet-agent
+brew install OpenVoxProject/homebrew-openvox/puppet-agent
 ```
 
 Additionally we maintain versioned casks for each collection
