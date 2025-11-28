@@ -3,142 +3,94 @@ require 'erb'
 require 'net/http'
 require 'tmpdir'
 
-def fetch(uri, limit = 10)
-  # puts "Fetching #{uri}" # Uncomment to debug what URI's are being fetched
+# URL where our MacOS builds are located
+MACOS_BASE_URL = 'https://downloads.voxpupuli.org/mac'
+# MacOS architectures we can support (symbolized)
+SUPPORTED_ARCHITECTURES = %i[arm64 x86_64]
+# Minimal supported MacOS version
+MINIMAL_MACOS_VERSION_SUPPORTED = 'ventura'
+# Map pkg name to collection name
+PKG_TO_COLLECTIONS = {
+  'openbolt' => 'openvox-tools'
+}
+# RE to decompose installer filename in a href
+INSTALLER_HREF_RE = /href="([\w-]+)-(\d+\.\d+\.\d+(?:\.\d+)?)-\d\.macos\.all\.(#{SUPPORTED_ARCHITECTURES.join('|')})\.dmg"/
+# Opposite to the above. Recompose installer filename from parts
+def pinfo_to_filename(pinfo)
+  "#{pinfo[:name]}-#{pinfo[:version]}-1.macos.all.#{pinfo[:arch]}.dmg"
+end
+
+def get_with_redirs(http, path, limit: 10)
   raise 'too many HTTP redirects' if limit == 0
-  response = Net::HTTP.get_response(URI(uri))
-  case response
-  when Net::HTTPSuccess then
-    response
-  when Net::HTTPRedirection then
-    fetch(response['location'], limit - 1)
-  else
-    raise "Request for listing failed: #{response.body}"
+
+  response = http.get(path)
+  return response unless response == Net::HTTPRedirection
+
+  get_with_redirs(http, response['location'], limit: limit - 1) if response == Net::HTTPRedirection
+end
+
+# Crawl the collection and gather supported OSes/packages/versions/etc.
+# Returns array of hashes [{ pkg: ..., version: ..., arch: ... }, {...}]
+def gather_downloads(collection)
+  uri = URI("#{MACOS_BASE_URL}/#{collection}")
+
+  puts "Crawling #{uri}/ ..."
+  Net::HTTP.start(uri.hostname) do |http|
+    resp = get_with_redirs(http, "#{uri.path}/") # Keep the trailing slash
+    resp.body.scan(INSTALLER_HREF_RE).map do |x|
+      { name: x[0], version: x[1], arch: x[2] }
+    end
   end
 end
 
-PKG_TO_COLLECTIONS = {
-  'puppet-bolt' => 'puppet-tools',
-  'pdk' => 'puppet-tools'
-}
+# Get checksum of a package
+def get_checksum(filename, collection)
+  uri = URI("#{MACOS_BASE_URL}/#{collection}")
 
-VERSION_TO_CODENAME = {
-  '10.10' => :yosemite,
-  '10.11' => :el_capitan,
-  '10.12' => :sierra,
-  '10.13' => :high_sierra,
-  '10.14' => :mojave,
-  '10.15' => :catalina,
-  '11'    => :big_sur,
-  '12'    => :monterey,
-  '13'    => :ventura,
-  '14'    => :sonoma,
-}
+  puts "Fetching and calculating checksum for #{filename} ..."
+  Net::HTTP.start(uri.hostname) do |http|
+    resp = get_with_redirs(http, "#{uri.path}/#{filename}")
+    return nil unless resp.is_a? Net::HTTPSuccess
 
-LATEST_PE = '2021'
-
-CLIENT_TOOLS = {
-  '2021'   => '21.1.0',
-  '2019.8' => '19.8.6',
-}
-
-def operating_systems(collection, pkg = nil)
-  if %w[puppet-bolt].include?(pkg)
-    return %w[10.11 10.12 10.13 10.14 10.15 11 12]
-  end
-
-  if %w[pdk].include?(pkg)
-    return %w[11 12 13]
-  end
-
-  case collection
-  when 'pct2019.8'
-    %w[10.14 10.15]
-  when 'pct2021'
-    %w[10.14 10.15]
-  when 'puppet7'
-    %w[11 12 13 14]
-  when 'puppet'
-    %w[11 12 13 14]
-  when 'puppet8'
-    %w[11 12 13 14]
-  else
-    %w[10.11 10.12 10.13 10.14 10.15 11 12 13 14]
+    Digest::SHA256.hexdigest(resp.body)
   end
 end
 
 namespace :brew do
-  desc 'Update SHAs for a specific package: rake brew:cask[puppet-bolt] or rake brew:cask[puppet-agent,5]'
+  desc 'Render cask file for a specific package: rake brew:cask[openbolt] or rake brew:cask[openvox-agent,8]'
   task :cask, [:pkg, :collection] do |task, args|
     pkg = args[:pkg]
-    collection = PKG_TO_COLLECTIONS[pkg] || "puppet#{args[:collection]}"
+    collection = PKG_TO_COLLECTIONS[pkg] || "openvox#{args[:collection]}"
     cask = pkg
     cask += '-' + args[:collection] if args[:collection]
-    os_versions = operating_systems(collection, pkg)
 
-    path_pre = "https://downloads.puppet.com/mac/#{collection}/"
+    all_packages = gather_downloads(collection)
+    my_packages = all_packages.filter { |x| x[:name] == pkg }
+    max_version_by_arch = my_packages.group_by { |x| x[:arch] }.map do |arch, pkgs|
+      [ arch, pkgs.max_by { |x| Gem::Version.new(x[:version]) } ]
+    end.to_h
 
-    latest_versions = os_versions.map do |os_ver|
-      resp = fetch("#{path_pre}#{os_ver}/x86_64/")
-      raise "Request for listing failed: #{resp.body}" unless resp.kind_of? Net::HTTPSuccess
-      versions = resp.body.scan(/#{pkg}-(\d+\.\d+\.\d+(?:\.\d+)?)-\d\.osx#{os_ver}\.dmg/).map(&:first).uniq
-      versions.sort_by! {|version| Gem::Version.new(version)}
-      versions.last
-    end
-    puts "Getting SHA256 sums for #{pkg}: #{latest_versions}"
+    package_data = max_version_by_arch.map do |arch, pinfo|
+      filename = pinfo_to_filename(pinfo)
+      [ arch, pinfo.merge(
+        sha256: get_checksum(filename, collection),
+        filename: filename,
+      ) ]
+    end.to_h
 
-    package_triples = os_versions.zip(latest_versions).map do |os_ver, pkg_ver|
-      if pkg_ver
-        resp = fetch("#{path_pre}#{os_ver}/x86_64/#{pkg}-#{pkg_ver}-1.osx#{os_ver}.dmg")
-        x86_64_sha = Digest::SHA256.hexdigest(resp.body)
-        arm64_sha = 'nil'
-        if pkg == 'puppet-agent' && os_ver.to_i > 11 && cask == 'puppet-agent-8' || pkg == 'puppet-agent' && cask != 'puppet-agent-8' ||
-           pkg == 'pdk' && os_ver.to_i > 12
-          resp_arm64 = fetch("#{path_pre}#{os_ver}/arm64/#{pkg}-#{pkg_ver}-1.osx#{os_ver}.dmg")
-          arm64_sha  = Digest::SHA256.hexdigest(resp_arm64.body)
-        end
-        [os_ver, pkg_ver, x86_64_sha, arm64_sha]
-      end
-    end.compact
-
-    url = "#{path_pre}"+'#{os_ver}/#{arch}/'+pkg+'-#{version}-1.osx#{os_ver}.dmg'
-
-    source_stanza = ERB.new(File.read(File.join(__dir__, 'templates', "source_stanza.erb")), trim_mode: '-').result(binding)
+    source_stanza_erb = ERB.new(File.read(File.join(__dir__, 'templates', 'source_stanza.erb')), trim_mode: '-')
+    source_stanza_content = source_stanza_erb.result_with_hash(
+      base_url: "#{MACOS_BASE_URL}/#{collection}",
+      pkg: pkg,
+      minimal_macos_version_supported: MINIMAL_MACOS_VERSION_SUPPORTED,
+      package_data: package_data,
+    )
 
     cask_erb = ERB.new(File.read(File.join(__dir__, 'templates', "#{cask}.rb.erb")), trim_mode: '-')
-    File.write(File.join(__dir__, 'Casks', "#{cask}.rb"), cask_erb.result(binding))
-  end
+    cask_content = cask_erb.result_with_hash(
+      source_stanza: source_stanza_content
+    )
 
-  desc 'Update SHAs for pe-client-tools: rake brew:pe_client_tools rake brew:pe_client_tools[2019.3]'
-  task :pe_client_tools, [:collection] do |task, args|
-    pkg = 'pe-client-tools'
-    collection = args[:collection] || LATEST_PE
-    version = CLIENT_TOOLS[collection]
-    cask = pkg
-    cask += '-' + args[:collection] if args[:collection]
-    os_versions = operating_systems("pct#{collection}")
-
-    pe_ver = CLIENT_TOOLS[collection].dup.prepend('20')
-    path_pre = "https://pm.puppet.com/pe-client-tools/#{pe_ver}/"
-
-    latest_versions = os_versions.map do |os_ver|
-      version
-    end
-
-    package_triples = os_versions.zip(latest_versions).map do |os_ver, pkg_ver|
-      if pkg_ver
-        puts "Getting SHA256 sum for #{pkg} #{pkg_ver} on macOS #{os_ver}"
-        resp = fetch("#{path_pre}#{pkg_ver}/repos/apple/#{os_ver}/PC1/x86_64/#{pkg}-#{pkg_ver}-1.osx#{os_ver}.dmg")
-        sha = Digest::SHA256.hexdigest(resp.body)
-        [os_ver, pkg_ver, sha]
-      end
-    end.compact
-
-    url = "#{path_pre}"+'#{version}/repos/apple/#{os_ver}/PC1/x86_64/'+pkg+'-#{version}-1.osx#{os_ver}.dmg'
-
-    source_stanza = ERB.new(File.read(File.join(__dir__, 'templates', "source_stanza.erb")), 0, '-').result(binding)
-
-    cask_erb = ERB.new(File.read(File.join(__dir__, 'templates', "#{cask}.rb.erb")), 0, '-')
-    File.write(File.join(__dir__, 'Casks', "#{cask}.rb"), cask_erb.result(binding))
+    File.write(File.join(__dir__, 'Casks', "#{cask}.rb"), cask_content)
   end
 end
