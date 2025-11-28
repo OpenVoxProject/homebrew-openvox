@@ -1,29 +1,21 @@
-<% supported_vers = package_data.keys.sort_by {|x| x.to_i} -%>
   arch arm: 'arm64', intel: 'x86_64'
 
-<% package_data.each do |os_ver, data| -%>
-<% pinfo = data[:pkg_info] -%>
-  on_<%= data[:os_name] %> <%= (os_ver == supported_vers.last ? ':or_newer' : '') %> do
+  on_<%= minimal_macos_version_supported %> :or_newer do
+<% package_data.each do |arch, pinfo| -%>
+<% if arch == 'arm64' -%>
     on_arm do
-<% if pinfo[:arm64] -%>
-      version "<%= pinfo[:arm64][:version] %>"
-      sha256  "<%= pinfo[:arm64][:sha256] %>"
-<% else -%>
-      raise "Not supported"
-<% end -%>
-    end
+<% elsif arch == 'x86_64' -%>
     on_intel do
-<% if pinfo[:x86_64] -%>
-      version "<%= pinfo[:x86_64][:version] %>"
-      sha256  "<%= pinfo[:x86_64][:sha256] %>"
 <% else -%>
-      raise "Not supported"
+<%   continue -%>
 <% end -%>
+      version "<%= pinfo[:version] %>"
+      sha256  "<%= pinfo[:sha256] %>"
     end
-  end
 <% end -%>
+  end
 
-  depends_on macos: '>= :<%= package_data[supported_vers.first][:os_name] %>'
+  depends_on macos: '>= :<%= minimal_macos_version_supported %>'
 
-  url "<%= '%s/#{MacOS.version.major}/#{arch}/%s-#{version}-1.osx#{MacOS.version.major}.dmg' % [base_url, pkg] %>"
+  url "<%= '%s/%s-#{version}-1.macos.all.#{arch}.dmg' % [base_url, pkg] %>"
   pkg "<%= pkg %>-#{version}-1-installer.pkg"
