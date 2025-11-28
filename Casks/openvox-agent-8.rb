@@ -3,8 +3,8 @@ cask 'openvox-agent-8' do
 
   on_sequoia :or_newer do
     on_arm do
-      version "8.19.2"
-      sha256  "0f93a2e80de0bf4b9903669b353ff5d8d288de1ddf80746386432064d5c2a79f"
+      version "8.22.1"
+      sha256  "1f7ac6e91837335205e33f0abb9171f591e675039da26340b59f78ccdeb321ef"
     end
     on_intel do
       raise "Not supported"
