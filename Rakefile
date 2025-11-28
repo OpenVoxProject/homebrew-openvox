@@ -17,7 +17,7 @@ VERSION_TO_CODENAME = {
 }
 # Map pkg name to collection name
 PKG_TO_COLLECTIONS = {
-  'openvox-bolt' => 'openvox-tools'
+  'openbolt' => 'openvox-tools'
 }
 
 def get_with_redirs(http, path, limit: 10)
@@ -89,7 +89,7 @@ def gather_checksums(os_packages, collection, pkg)
 end
 
 namespace :brew do
-  desc 'Render cask file for a specific package: rake brew:cask[openvox-bolt] or rake brew:cask[openvox-agent,8]'
+  desc 'Render cask file for a specific package: rake brew:cask[openbolt] or rake brew:cask[openvox-agent,8]'
   task :cask, [:pkg, :collection] do |task, args|
     pkg = args[:pkg]
     collection = PKG_TO_COLLECTIONS[pkg] || "openvox#{args[:collection]}"
