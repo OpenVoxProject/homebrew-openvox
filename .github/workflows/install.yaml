@@ -33,5 +33,7 @@ jobs:
         run: brew tap local/test .
       - name: Install openvox-agent-8 cask
         run: brew install --display-times --verbose --cask openvox-agent-8
+      - name: Check openvox-agent-8
+        run: /opt/puppetlabs/bin/puppet apply -e 'notice $facts["implementation"], $facts["clientversion"]'
       - name: Uninstall openvox-agent-8 cask
         run: brew uninstall --verbose --cask openvox-agent-8
