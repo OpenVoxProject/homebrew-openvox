@@ -24,7 +24,7 @@ cask 'openvox-agent-8' do
                          'puppet',
                          'pxp-agent',
                        ],
-            pkgutil:   'com.puppetlabs.puppet-agent'
+            pkgutil:   'org.voxpupuli.openvox-agent'
 
   zap trash: [
                '~/.puppetlabs',
