@@ -1,17 +1,18 @@
 name: Brew install tests
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
+    # Execute this workflow ONLY if any cask was changed
+    paths:
+      - Casks/*.rb
 
 permissions:
   contents: read
 
 jobs:
   install_casks:
-    name: Install ${{ matrix.cask }} cask on ${{ matrix.macos }}
+    name: Install casks on ${{ matrix.macos }}
     strategy:
       matrix:
         macos:
