@@ -1,42 +1,40 @@
 name: Brew install tests
 
 on:
-  push:
-    branches: [master]
   pull_request:
-    branches: [master]
+    branches: [main]
+    # Execute this workflow ONLY if any cask was changed
+    paths:
+      - Casks/*.rb
 
 permissions:
   contents: read
 
 jobs:
   install_casks:
-    name: Install ${{ matrix.cask }} cask on ${{ matrix.macos }}
+    name: Install casks on ${{ matrix.macos }}
     strategy:
       matrix:
-        macos: [ 'macos-12', 'macos-13', 'macos-14' ]
-        cask: [ 'pe-client-tools', 'pe-client-tools-2019.8', 'pdk', 'puppet-agent', 'puppet-agent-7', 'puppet-agent-8', 'puppet-bolt', 'puppet-bolt@2' ]
+        macos:
+          - macos-13
+          - macos-14
+          - macos-15
+          - macos-15-intel
+          - macos-26
     env:
       HOMEBREW_LOGS: ~/homebrew-logs
       HOMEBREW_TEMP: ~/homebrew-temp
       HOMEBREW_NO_AUTO_UPDATE: 1
     runs-on: ${{ matrix.macos }}
     steps:
-      - name: Checkout current PR
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - run: brew install --cask Casks/${{ matrix.cask }}.rb --force
-  install_formulae:
-    name: Install ${{ matrix.formula }} formula on ${{ matrix.macos }}
-    strategy:
-      matrix:
-        macos: [ 'macos-12' ]
-        formula: [ 'kubectl-ran' ]
-    runs-on: ${{ matrix.macos }}
-    steps:
-      - name: Checkout current PR
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - run: brew install Formula/${{ matrix.formula }}.rb
+      - name: Create a temporary tap
+        run: brew tap local/test .
+      - name: Install openvox-agent-8 cask
+        run: brew install --display-times --verbose --cask openvox-agent-8
+      - name: Check openvox-agent-8
+        run: /opt/puppetlabs/bin/puppet apply -e 'notice $facts["implementation"], $facts["clientversion"]'
+      - name: Uninstall openvox-agent-8 cask
+        run: brew uninstall --verbose --cask openvox-agent-8

@@ -1,0 +1,25 @@
+name: Check if casks are up-to-date
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check_casks:
+    name: Check casks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+      - name: Update openvox-agent-8 cask
+        run: bundle exec rake 'brew:cask[openvox-agent,8]'
+      - name: Check if openvox-agent-8 is up-to-date
+        run: git diff --exit-code
