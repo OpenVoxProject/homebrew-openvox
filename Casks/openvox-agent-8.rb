@@ -3,12 +3,12 @@ cask 'openvox-agent-8' do
 
   on_ventura :or_newer do
     on_arm do
-      version "8.24.0"
-      sha256  "1ff2ec9380d9f8377ce8585509d8a706070a5de577a501db0176b63e4b678d04"
+      version "8.24.1"
+      sha256  "88c88f45e39091820663af97e42ed3f1be9687bf3285c1cd5027c2cd38c33c40"
     end
     on_intel do
-      version "8.24.0"
-      sha256  "ffe73329f2e3dca4a0036e564bc7e462c07e01b5a18ade8fa3cf75d2cd86eb64"
+      version "8.24.1"
+      sha256  "76a648777168bd05a117d9fbe66c5eebf62a76eda9fd4796c6c266d3df01e565"
     end
   end
 
