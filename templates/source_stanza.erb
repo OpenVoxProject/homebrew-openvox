@@ -1,24 +1,21 @@
-  case MacOS.version
-<% package_triples.take(package_triples.count-1).each do |os_ver, pkg_ver, x86_64_sha, arm64_sha| -%>
-  when '<%= os_ver %>'
-    os_ver = '<%= os_ver %>'
-    version '<%= pkg_ver %>'
-    if arch == 'arm64'
-      sha256 '<%= arm64_sha %>'
-    elsif arch == 'x86_64'
-      sha256 '<%= x86_64_sha %>'
+  arch arm: 'arm64', intel: 'x86_64'
+
+  on_<%= minimal_macos_version_supported %> :or_newer do
+<% package_data.each do |arch, pinfo| -%>
+<% if arch == 'arm64' -%>
+    on_arm do
+<% elsif arch == 'x86_64' -%>
+    on_intel do
+<% else -%>
+<%   continue -%>
+<% end -%>
+      version "<%= pinfo[:version] %>"
+      sha256  "<%= pinfo[:sha256] %>"
     end
 <% end -%>
-  else
-    os_ver = '<%= package_triples.last[0] %>'
-    version '<%= package_triples.last[1] %>'
-    if arch == 'x86_64'
-      sha256 '<%= package_triples.last[2] %>'
-    elsif arch == 'arm64'
-      sha256 '<%= package_triples.last[3] %>'
-    end
   end
 
-  depends_on macos: '>= :<%= VERSION_TO_CODENAME[package_triples[0][0]] %>'
-  url "<%= url %>"
+  depends_on macos: '>= :<%= minimal_macos_version_supported %>'
+
+  url "<%= '%s/%s-#{version}-1.macos.all.#{arch}.dmg' % [base_url, pkg] %>"
   pkg "<%= pkg %>-#{version}-1-installer.pkg"
