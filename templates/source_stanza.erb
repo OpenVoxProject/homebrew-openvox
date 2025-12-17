@@ -17,5 +17,5 @@
 
   depends_on macos: '>= :<%= minimal_macos_version_supported %>'
 
-  url "<%= '%s/%s-#{version}-1.macos.all.#{arch}.dmg' % [base_url, pkg] %>"
-  pkg "<%= pkg %>-#{version}-1-installer.pkg"
+  url "<%= '%s/%s-#{version}-1.macos.all.#{arch}.dmg' % [base_url, remote_name] %>"
+  pkg "<%= remote_name %>-#{version}-1-installer.pkg"

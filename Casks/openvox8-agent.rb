@@ -1,4 +1,4 @@
-cask 'openvox-agent-8' do
+cask 'openvox8-agent' do
   arch arm: 'arm64', intel: 'x86_64'
 
   on_ventura :or_newer do
@@ -20,9 +20,8 @@ cask 'openvox-agent-8' do
   name 'OpenVox Agent'
   homepage "https://voxpupuli.org/openvox/"
 
-  deprecate! date: '2025-12-01', because: :discontinued, replacement_cask: "openvox8-agent"
   conflicts_with cask: [
-    "openvox8-agent",
+    "openvox-agent-8",
     "puppet-agent-8",
     "puppet-agent-7",
     "puppet-agent-6",

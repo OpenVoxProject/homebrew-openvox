@@ -3,7 +3,8 @@
 A tap for [OpenVox](https://voxpupuli.org/openvox/) MacOS packages.
 
 - [How do I install these packages?](#how-do-i-install-these-packages)
-  - [OpenVox Agent](#openvox-agent)
+  - [openvox8-agent](#openvox8-agent)
+  - [openvox8-openbolt](#openvox8-openbolt)
 - [Updating versions](#updating-versions)
 
 ## How do I install these packages?
@@ -12,34 +13,25 @@ A tap for [OpenVox](https://voxpupuli.org/openvox/) MacOS packages.
 brew install --cask openvoxproject/openvox/<package>
 ```
 
-### OpenVox Agent
-
-To install the very latest [OpenVox Agent](https://github.com/openvoxproject/openvox-agent) with brew:
+### openvox8-agent
 
 ```bash
-brew install openvoxproject/openvox/openvox-agent
+brew install openvoxproject/openvox/openvox8-agent
 ```
 
-Additionally we maintain versioned casks for each collection
-
-- `openvoxproject/openvox/openvox-agent-8`
-
-## Updating versions
-
-When new versions of packages are shipped, you can use a Rake task to update the Cask to the latest version and SHAs
+### openvox8-openbolt
 
 ```bash
-bundle exec rake 'brew:cask[openvox-agent]'
+brew install openvoxproject/openvox/openvox8-openbolt
 ```
 
-To update the versioned casks - for example `openvox-agent-8` - include the collection as a 2nd argument
+## Updating Casks
+
+When new version of a package is shipped, you should use the `brew:cask` Rake task to update the Cask related.
 
 ```bash
-bundle exec rake 'brew:cask[openvox-agent,8]'
+bundle exec rake 'brew:cask[agent,8]'
+bundle exec rake 'brew:cask[openbolt,8]'
 ```
 
-You can test updated Cask files with
-
-```bash
-brew install Casks/openvox-agent.rb --force
-```
+Here, second argument (`8`) is "collection". It corresponds to the `openvox8` directory on the downloads.voxpupuli.org server.
