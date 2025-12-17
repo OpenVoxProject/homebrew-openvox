@@ -9,10 +9,6 @@ MACOS_BASE_URL = 'https://downloads.voxpupuli.org/mac'
 SUPPORTED_ARCHITECTURES = %i[arm64 x86_64]
 # Minimal supported MacOS version
 MINIMAL_MACOS_VERSION_SUPPORTED = 'ventura'
-# Map pkg name to collection name
-PKG_TO_COLLECTIONS = {
-  'openbolt' => 'openvox-tools'
-}
 # RE to decompose installer filename in a href
 INSTALLER_HREF_RE = /href="([\w-]+)-(\d+\.\d+\.\d+(?:\.\d+)?)-\d\.macos\.all\.(#{SUPPORTED_ARCHITECTURES.join('|')})\.dmg"/
 # Opposite to the above. Recompose installer filename from parts
@@ -57,33 +53,37 @@ def get_checksum(filename, collection)
 end
 
 namespace :brew do
-  desc 'Render cask file for a specific package: rake brew:cask[openbolt] or rake brew:cask[openvox-agent,8]'
+  desc 'Render cask file for a specific package: rake brew:cask[openbolt,8] or rake brew:cask[agent,8]'
   task :cask, [:pkg, :collection] do |task, args|
     pkg = args[:pkg]
-    collection = PKG_TO_COLLECTIONS[pkg] || "openvox#{args[:collection]}"
-    cask = pkg
-    cask += '-' + args[:collection] if args[:collection]
+    collection = "openvox#{args[:collection]}"
+    cask = "#{collection}-#{pkg}"
+
+    # Map pkg to a remote file name on the download server
+    remote_name = {
+      'agent' => 'openvox-agent'
+    }.fetch(pkg, pkg)
 
     all_packages = gather_downloads(collection)
-    my_packages = all_packages.filter { |x| x[:name] == pkg }
+    my_packages = all_packages.filter { |x| x[:name] == remote_name }
     max_version_by_arch = my_packages.group_by { |x| x[:arch] }.map do |arch, pkgs|
-      [ arch, pkgs.max_by { |x| Gem::Version.new(x[:version]) } ]
+      [arch, pkgs.max_by { |x| Gem::Version.new(x[:version]) }]
     end.to_h
 
     package_data = max_version_by_arch.map do |arch, pinfo|
       filename = pinfo_to_filename(pinfo)
-      [ arch, pinfo.merge(
+      [arch, pinfo.merge(
         sha256: get_checksum(filename, collection),
-        filename: filename,
-      ) ]
+        filename: filename
+      )]
     end.to_h
 
     source_stanza_erb = ERB.new(File.read(File.join(__dir__, 'templates', 'source_stanza.erb')), trim_mode: '-')
     source_stanza_content = source_stanza_erb.result_with_hash(
       base_url: "#{MACOS_BASE_URL}/#{collection}",
-      pkg: pkg,
+      remote_name: remote_name,
       minimal_macos_version_supported: MINIMAL_MACOS_VERSION_SUPPORTED,
-      package_data: package_data,
+      package_data: package_data
     )
 
     cask_erb = ERB.new(File.read(File.join(__dir__, 'templates', "#{cask}.rb.erb")), trim_mode: '-')
