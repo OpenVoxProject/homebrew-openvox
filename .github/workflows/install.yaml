@@ -16,7 +16,6 @@ jobs:
     strategy:
       matrix:
         macos:
-          - macos-13
           - macos-14
           - macos-15
           - macos-15-intel
@@ -32,9 +31,23 @@ jobs:
           fetch-depth: 0
       - name: Create a temporary tap
         run: brew tap local/test .
-      - name: Install openvox-agent-8 cask
-        run: brew install --display-times --verbose --cask openvox-agent-8
-      - name: Check openvox-agent-8
-        run: /opt/puppetlabs/bin/puppet apply -e 'notice $facts["implementation"], $facts["clientversion"]'
-      - name: Uninstall openvox-agent-8 cask
-        run: brew uninstall --verbose --cask openvox-agent-8
+
+      - name: Install openvox8-agent cask
+        run: brew install --display-times --cask openvox8-agent
+      - name: Check openvox8-agent
+        run: /opt/puppetlabs/bin/puppet apply -e 'warning $facts["implementation"], $facts["clientversion"]'
+      - name: Uninstall openvox8-agent cask
+        run: brew uninstall --cask openvox8-agent
+      - name: Check openvox8-agent uninstalled cleanly
+        run: '! pkgutil --pkgs=^org\.voxpupuli\.openvox-agent$'
+
+      - name: Install openvox8-openbolt cask
+        run: brew install --display-times --cask openvox8-openbolt
+      - name: Check openvox8-openbolt
+        run: >-
+          /opt/puppetlabs/bin/bolt --version
+          && /opt/puppetlabs/bin/bolt apply -e 'warning $facts["implementation"], $facts["clientversion"]' -t localhost --verbose
+      - name: Uninstall openvox8-openbolt cask
+        run: brew uninstall --cask openvox8-openbolt
+      - name: Check openvox8-openbolt uninstalled cleanly
+        run: '! pkgutil --pkgs=^org\.voxpupuli\.openbolt$'
