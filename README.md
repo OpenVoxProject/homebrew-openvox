@@ -5,7 +5,7 @@ A tap for [OpenVox](https://voxpupuli.org/openvox/) MacOS packages.
 - [How do I install these packages?](#how-do-i-install-these-packages)
   - [openvox8-agent](#openvox8-agent)
   - [openvox8-openbolt](#openvox8-openbolt)
-- [Updating versions](#updating-versions)
+- [Updating Casks](#updating-casks)
 
 ## How do I install these packages?
 
