@@ -30,7 +30,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Create a temporary tap
-        run: brew tap local/test .
+        run: >-
+          brew tap local/test .
+          && brew trust local/test
 
       - name: Install openvox8-agent cask
         run: brew install --display-times --cask openvox8-agent

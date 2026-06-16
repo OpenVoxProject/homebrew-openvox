@@ -12,7 +12,7 @@ cask 'openvox8-agent' do
     end
   end
 
-  depends_on macos: '>= :ventura'
+  depends_on macos: :ventura
 
   url "https://downloads.voxpupuli.org/mac/openvox8/openvox-agent-#{version}-1.macos.all.#{arch}.dmg"
   pkg "openvox-agent-#{version}-1-installer.pkg"
