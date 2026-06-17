@@ -3,12 +3,12 @@ cask 'openvox8-openbolt' do
 
   on_ventura :or_newer do
     on_arm do
-      version "5.5.0"
-      sha256  "7baa8e1f41776d5eed490ff6a038c7f7dc33121806b12f41870a6db1f659f935"
+      version "5.6.0"
+      sha256  "c08b5061712128d7e806aad5f81f6a190140a7af8ffde8aeff618fe8f2a37769"
     end
     on_intel do
-      version "5.5.0"
-      sha256  "4b937f0c2e89309a654e824b4a9681c7cf018ca8f0e734ca6b4a2c86e6cd127e"
+      version "5.6.0"
+      sha256  "b447f7c4b6489d5db4403e81892e4c7c46b571589347edbd397b8b593b291ee1"
     end
   end
 
