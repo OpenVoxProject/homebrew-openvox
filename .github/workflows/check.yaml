@@ -19,7 +19,7 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-          
+
       - name: Update openvox8-agent cask
         run: bundle exec rake 'brew:cask[agent,8]'
       - name: Check if openvox8-agent is up-to-date
