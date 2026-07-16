@@ -1,0 +1,26 @@
+cask 'openvox9-agent' do
+<%= source_stanza %>
+  name 'OpenVox Agent'
+  homepage "https://voxpupuli.org/openvox/"
+
+  conflicts_with cask: [
+    "openvox8-agent",
+    "openvox-agent-8",
+    "puppet-agent-9",
+    "puppet-agent-8",
+    "puppet-agent-7",
+    "puppet-agent-6",
+    "puppet-agent-5",
+    "puppet-agent",
+  ]
+
+  uninstall launchctl: [
+                         'puppet',
+                       ],
+            pkgutil:   'org.voxpupuli.openvox-agent'
+
+  zap trash: [
+               '~/.puppetlabs',
+               '/etc/puppetlabs',
+             ]
+end
