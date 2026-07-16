@@ -3,8 +3,8 @@
 A tap for [OpenVox](https://voxpupuli.org/openvox/) MacOS packages.
 
 - [How do I install these packages?](#how-do-i-install-these-packages)
-  - [openvox8-agent](#openvox8-agent)
-  - [openvox8-openbolt](#openvox8-openbolt)
+  - [OpenVox agent](#openvox-agent)
+  - [OpenBolt](#openbolt)
 - [Updating Casks](#updating-casks)
 
 ## How do I install these packages?
@@ -13,15 +13,20 @@ A tap for [OpenVox](https://voxpupuli.org/openvox/) MacOS packages.
 brew install --cask openvoxproject/openvox/<package>
 ```
 
-### openvox8-agent
+### OpenVox Agent
 
 ```bash
+# Install OpenVox agent v8
 brew install openvoxproject/openvox/openvox8-agent
+
+# Install OpenVox agent v9
+brew install openvoxproject/openvox/openvox9-agent
 ```
 
-### openvox8-openbolt
+### OpenBolt
 
 ```bash
+# Install OpenBolt v8
 brew install openvoxproject/openvox/openvox8-openbolt
 ```
 
@@ -34,4 +39,4 @@ bundle exec rake 'brew:cask[agent,8]'
 bundle exec rake 'brew:cask[openbolt,8]'
 ```
 
-Here, second argument (`8`) is "collection". It corresponds to the `openvox8` directory on the downloads.voxpupuli.org server.
+Here, second argument is "collection". It corresponds to the `openvox<major-version>` directory on the downloads.voxpupuli.org server.

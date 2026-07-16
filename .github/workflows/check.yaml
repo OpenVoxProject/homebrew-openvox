@@ -25,6 +25,12 @@ jobs:
       - name: Check if openvox8-agent is up-to-date
         run: git diff --exit-code
 
+      - name: Update openvox9-agent cask
+        run: bundle exec rake 'brew:cask[agent,9]'
+      - name: Check if openvox9-agent is up-to-date
+        run: git diff --exit-code
+
+
       - name: Update openvox8-openbolt cask
         run: bundle exec rake 'brew:cask[openbolt,8]'
       - name: Check if openvox8-openbolt is up-to-date
