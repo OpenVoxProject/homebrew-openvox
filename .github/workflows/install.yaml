@@ -16,10 +16,10 @@ jobs:
     strategy:
       matrix:
         macos:
-          - macos-14
           - macos-15
           - macos-15-intel
           - macos-26
+          - macos-26-intel
     env:
       HOMEBREW_LOGS: ~/homebrew-logs
       HOMEBREW_TEMP: ~/homebrew-temp
@@ -41,6 +41,15 @@ jobs:
       - name: Uninstall openvox8-agent cask
         run: brew uninstall --cask openvox8-agent
       - name: Check openvox8-agent uninstalled cleanly
+        run: '! pkgutil --pkgs=^org\.voxpupuli\.openvox-agent$'
+
+      - name: Install openvox9-agent cask
+        run: brew install --display-times --cask openvox9-agent
+      - name: Check openvox9-agent
+        run: /opt/puppetlabs/bin/puppet apply -e 'warning $facts["implementation"], $facts["clientversion"]'
+      - name: Uninstall openvox9-agent cask
+        run: brew uninstall --cask openvox9-agent
+      - name: Check openvox9-agent uninstalled cleanly
         run: '! pkgutil --pkgs=^org\.voxpupuli\.openvox-agent$'
 
       - name: Install openvox8-openbolt cask
