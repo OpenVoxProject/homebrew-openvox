@@ -30,7 +30,7 @@ end
 def gather_downloads(collection)
   uri = URI("#{MACOS_BASE_URL}/#{collection}")
 
-  puts "Crawling #{uri}/ ..."
+  puts "+ Crawling #{uri}/ ..."
   Net::HTTP.start(uri.hostname) do |http|
     resp = get_with_redirs(http, "#{uri.path}/") # Keep the trailing slash
     resp.body.scan(INSTALLER_HREF_RE).map do |x|
@@ -43,7 +43,7 @@ end
 def get_checksum(filename, collection)
   uri = URI("#{MACOS_BASE_URL}/#{collection}")
 
-  puts "Fetching and calculating checksum for #{filename} ..."
+  puts "+ Fetching and calculating checksum for #{filename} ..."
   Net::HTTP.start(uri.hostname) do |http|
     resp = get_with_redirs(http, "#{uri.path}/#{filename}")
     return nil unless resp.is_a? Net::HTTPSuccess
@@ -54,10 +54,12 @@ end
 
 namespace :brew do
   desc 'Render cask file for a specific package: rake brew:cask[openbolt,8] or rake brew:cask[agent,8]'
-  task :cask, [:pkg, :collection] do |task, args|
+  task :cask, [:pkg, :collection] do |_task, args|
     pkg = args[:pkg]
     collection = "openvox#{args[:collection]}"
     cask = "#{collection}-#{pkg}"
+
+    puts "Updating #{cask} cask ..."
 
     # Map pkg to a remote file name on the download server
     remote_name = {
@@ -99,6 +101,7 @@ namespace :brew do
     task :all do
       [
         ['agent', 8],
+        ['agent', 9],
         ['openbolt', 8]
       ].each do |pkg, collection|
         Rake::Task['brew:cask'].invoke(pkg, collection)
