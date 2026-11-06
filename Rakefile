@@ -54,7 +54,7 @@ end
 
 namespace :brew do
   desc 'Render cask file for a specific package: rake brew:cask[openbolt,8] or rake brew:cask[agent,8]'
-  task :cask, [:pkg, :collection] do |task, args|
+  task :cask, [:pkg, :collection] do |_task, args|
     pkg = args[:pkg]
     collection = "openvox#{args[:collection]}"
     cask = "#{collection}-#{pkg}"
@@ -99,6 +99,7 @@ namespace :brew do
     task :all do
       [
         ['agent', 8],
+        ['agent', 9],
         ['openbolt', 8]
       ].each do |pkg, collection|
         Rake::Task['brew:cask'].invoke(pkg, collection)
