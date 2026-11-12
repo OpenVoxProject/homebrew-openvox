@@ -102,7 +102,8 @@ namespace :brew do
       [
         ['agent', 8],
         ['agent', 9],
-        ['openbolt', 8]
+        ['openbolt', 8],
+        ['openbolt', 9],
       ].each do |pkg, collection|
         Rake::Task['brew:cask'].invoke(pkg, collection)
         Rake::Task['brew:cask'].reenable # Allow the task to be re-invoked
