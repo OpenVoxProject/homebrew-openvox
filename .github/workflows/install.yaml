@@ -62,3 +62,14 @@ jobs:
         run: brew uninstall --cask openvox8-openbolt
       - name: Check openvox8-openbolt uninstalled cleanly
         run: '! pkgutil --pkgs=^org\.voxpupuli\.openbolt$'
+
+      - name: Install openvox9-openbolt cask
+        run: brew install --display-times --cask openvox9-openbolt
+      - name: Check openvox9-openbolt
+        run: >-
+          /opt/puppetlabs/bin/bolt --version
+          && /opt/puppetlabs/bin/bolt apply -e 'warning $facts["implementation"], $facts["clientversion"]' -t localhost --verbose
+      - name: Uninstall openvox9-openbolt cask
+        run: brew uninstall --cask openvox9-openbolt
+      - name: Check openvox9-openbolt uninstalled cleanly
+        run: '! pkgutil --pkgs=^org\.voxpupuli\.openbolt$'
