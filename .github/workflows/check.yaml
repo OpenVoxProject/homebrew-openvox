@@ -20,18 +20,7 @@ jobs:
           ruby-version: '3.3'
           bundler-cache: true
 
-      - name: Update openvox8-agent cask
-        run: bundle exec rake 'brew:cask[agent,8]'
-      - name: Check if openvox8-agent is up-to-date
-        run: git diff --exit-code
-
-      - name: Update openvox9-agent cask
-        run: bundle exec rake 'brew:cask[agent,9]'
-      - name: Check if openvox9-agent is up-to-date
-        run: git diff --exit-code
-
-
-      - name: Update openvox8-openbolt cask
-        run: bundle exec rake 'brew:cask[openbolt,8]'
-      - name: Check if openvox8-openbolt is up-to-date
+      - name: Regenerate all casks
+        run: bundle exec rake 'brew:cask:all'
+      - name: Check if casks are up-to-date
         run: git diff --exit-code
