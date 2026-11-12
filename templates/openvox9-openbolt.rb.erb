@@ -1,0 +1,12 @@
+cask 'openvox9-openbolt' do
+<%= source_stanza %>
+  name 'OpenVox Openbolt'
+  homepage "https://voxpupuli.org/openvox/"
+
+  conflicts_with cask: [
+    "openvox8-openbolt",
+    "puppet-bolt",
+  ]
+
+  uninstall pkgutil: 'org.voxpupuli.openbolt'
+end

@@ -28,6 +28,9 @@ brew install openvoxproject/openvox/openvox9-agent
 ```bash
 # Install OpenBolt v8
 brew install openvoxproject/openvox/openvox8-openbolt
+
+# Install OpenBolt v9
+brew install openvoxproject/openvox/openvox9-openbolt
 ```
 
 ## Updating Casks
@@ -35,8 +38,8 @@ brew install openvoxproject/openvox/openvox8-openbolt
 When new version of a package is shipped, you should use the `brew:cask` Rake task to update the Cask related.
 
 ```bash
-bundle exec rake 'brew:cask[agent,8]'
-bundle exec rake 'brew:cask[openbolt,8]'
+bundle exec rake 'brew:cask[agent,9]'
+bundle exec rake 'brew:cask[openbolt,9]'
 ```
 
 Here, second argument is "collection". It corresponds to the `openvox<major-version>` directory on the downloads.voxpupuli.org server.

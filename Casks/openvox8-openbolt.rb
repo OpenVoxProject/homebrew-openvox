@@ -20,7 +20,10 @@ cask 'openvox8-openbolt' do
   name 'OpenVox Openbolt'
   homepage "https://voxpupuli.org/openvox/"
 
-  conflicts_with cask: "puppet-bolt"
+  conflicts_with cask: [
+    "openvox9-openbolt",
+    "puppet-bolt",
+  ]
 
   uninstall pkgutil: 'org.voxpupuli.openbolt'
 end
